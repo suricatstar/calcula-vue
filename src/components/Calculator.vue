@@ -1,31 +1,33 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-// Tipos das operações
 type Operacao = 'somar' | 'subtrair' | 'multiplicar' | 'dividir'
 
-// Valores dos inputs (como string)
-const numero1 = ref<string>('')
-const numero2 = ref<string>('')
+const numero1 = ref<number | null>(null)
+const numero2 = ref<number | null>(null)
 const operacao = ref<Operacao>('somar')
 
-// Converte string para número
-const valor1 = computed<number>(() => Number(numero1.value.replace(',', '.')))
-const valor2 = computed<number>(() => Number(numero2.value.replace(',', '.')))
+const valor1 = computed<number>(() => {
+  if (numero1.value === null || numero1.value === undefined) return 0
+  const str = String(numero1.value)
+  return Number(str.replace(',', '.'))
+})
 
-// Calcula automaticamente o resultado
+const valor2 = computed<number>(() => {
+  if (numero2.value === null || numero2.value === undefined) return 0
+  const str = String(numero2.value)
+  return Number(str.replace(',', '.'))
+})
+
 const resultado = computed<string>(() => {
-  // Se algum campo estiver vazio
-  if (numero1.value === '' || numero2.value === '') {
-    return '—'
+  if (numero1.value === null || numero2.value === null || numero1.value === undefined || numero2.value === undefined) {
+    return '0'
   }
 
-  // Se não for um número válido
   if (isNaN(valor1.value) || isNaN(valor2.value)) {
-    return 'Número inválido'
+    return 'Erro'
   }
 
-  // Faz o cálculo baseado na operação
   switch (operacao.value) {
     case 'somar':
       return (valor1.value + valor2.value).toString()
@@ -35,103 +37,76 @@ const resultado = computed<string>(() => {
       return (valor1.value * valor2.value).toString()
     case 'dividir':
       if (valor2.value === 0) {
-        return 'Não pode dividir por zero'
+        return 'Erro'
       }
       return (valor1.value / valor2.value).toString()
     default:
-      return '—'
+      return '0'
   }
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm">
-      <!-- Cabeçalho -->
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-          </svg>
-        </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">
-          Calculadora
-        </h1>
-        <p class="text-gray-600">Faça seus cálculos de forma simples</p>
+  <div class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+      
+      <!-- Título -->
+      <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">
+        Calculadora
+      </h1>
+
+      <!-- Resultado (Display) -->
+      <div class="bg-gray-900 text-white p-4 rounded-lg mb-6 text-right">
+        <div class="text-3xl font-mono">{{ resultado }}</div>
       </div>
 
       <!-- Primeiro número -->
-      <div class="mb-6">
-        <label class="block text-sm font-semibold text-gray-700 mb-3">
-          📊 Primeiro número:
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Primeiro número
         </label>
         <input
-          v-model="numero1"
-          type="text"
-          inputmode="decimal"
-          placeholder="Digite um número"
-          class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+          v-model.number="numero1"
+          type="number"
+          placeholder="0"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       <!-- Operação -->
-      <div class="mb-6">
-        <label class="block text-sm font-semibold text-gray-700 mb-3">
-          ⚡ Operação:
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Operação
         </label>
         <select
           v-model="operacao"
-          class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 focus:bg-white cursor-pointer"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="somar">➕ Somar (+)</option>
-          <option value="subtrair">➖ Subtrair (-)</option>
-          <option value="multiplicar">✖️ Multiplicar (×)</option>
-          <option value="dividir">➗ Dividir (÷)</option>
+          <option value="somar">+ Somar</option>
+          <option value="subtrair">- Subtrair</option>
+          <option value="multiplicar">× Multiplicar</option>
+          <option value="dividir">÷ Dividir</option>
         </select>
       </div>
 
       <!-- Segundo número -->
-      <div class="mb-8">
-        <label class="block text-sm font-semibold text-gray-700 mb-3">
-          📊 Segundo número:
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Segundo número
         </label>
         <input
-          v-model="numero2"
-          type="text"
-          inputmode="decimal"
-          placeholder="Digite um número"
-          class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+          v-model.number="numero2"
+          type="number"
+          placeholder="0"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <!-- Resultado -->
-      <div class="relative">
-        <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 shadow-inner">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-semibold text-green-700 flex items-center">
-              🎯 Resultado:
-            </span>
-            <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-          </div>
-          <div class="text-3xl font-bold text-green-800 break-all">
-            {{ resultado }}
-          </div>
-        </div>
-        
-        <!-- Indicador de cálculo automático -->
-        <div class="mt-4 text-center">
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            ⚡ Cálculo automático ativo
-          </span>
-        </div>
-      </div>
+      <!-- Info -->
+      <p class="text-xs text-gray-500 text-center">
+        O resultado é calculado automaticamente
+      </p>
 
-      <!-- Rodapé -->
-      <div class="mt-8 text-center">
-        <p class="text-xs text-gray-500">
-          Digite os números e veja o resultado na hora! 🚀
-        </p>
-      </div>
     </div>
   </div>
 </template>
