@@ -88,7 +88,6 @@ const resultado = computed<string>(() => {
           <option value="dividir">÷ Dividir</option>
         </select>
       </div>
-
       <!-- Segundo número -->
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-2">
